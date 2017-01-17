@@ -23,6 +23,28 @@ module.exports = function (base) {
 };
 
 /**
+ * Variant of url.resolve(...) that retains the path from the base url
+ *
+ * url.resolve('/one/two/three', 'four')         // '/one/two/four'
+ * url.resolve('http://example.com/', '/one')    // 'http://example.com/one'
+ * url.resolve('http://example.com/one', '/two') // 'http://example.com/one/two'
+ *
+ * Scenario #3 differs from the original implementation of url.resolve(...)
+ *
+ * @param {String} from The Base URL being resolved against.
+ * @param {String} to The HREF URL being resolved.
+ *
+ * @return {String} URL with base and input resolved
+ */
+function resolveWithPath(from, to) {
+  var resolved = url.resolve(from, to);
+  var parsedFrom = url.parse(from);
+  var parsed = url.parse(resolved);
+  parsed.pathname = parsedFrom.pathname.replace(/\/$/, '') + parsed.pathname;
+  return url.format(parsed);
+}
+
+/**
  * Takes the `input` entity object and normalizes it into a valid siren object.
  *
  * @param {String} base   The base URL for this API.
@@ -59,7 +81,7 @@ function normalizeRel(base, input) {
   if (!Array.isArray(input)) input = [ input ];
 
   return flatten(input).map(function (rel) {
-    return rel in iana ? rel : url.resolve(base, rel);
+    return rel in iana ? rel : resolveWithPath(base, rel);
   });
 }
 
@@ -72,7 +94,7 @@ function normalizeRel(base, input) {
  */
 function normalizeHref(base, input) {
   if (!input) return;
-  return url.resolve(base, input);
+  return resolveWithPath(base, input)
 }
 
 /**
