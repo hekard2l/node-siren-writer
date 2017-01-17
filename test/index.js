@@ -130,6 +130,13 @@ describe('writer(base)', function () {
         assert.strictEqual(result.entities[0].rel[0], 'http://localhost/rels/test');
       });
 
+      it('should resolve non-IANA rels as urls relative to base', function () {
+        var siren = writer('http://localhost:8991/test')
+        var entity = { rel: 'rels/test' };
+        var result = siren({ entities: entity });
+        assert.strictEqual(result.entities[0].rel[0], 'http://localhost:8991/test/rels/test');
+      });
+
       it('should allow rels that include hyphens (#3)', function () {
         var entity = { rel: 'next-archive' };
         var result = siren({ entities: entity });
@@ -620,6 +627,13 @@ describe('writer(base)', function () {
         var link = { rel: 'self', href: '/products/1' };
         var result = siren({ links: link });
         assert.strictEqual(result.links[0].href, 'http://localhost/products/1');
+      });
+
+      it('should resolve relative to base with path', function () {
+        var siren = writer('http://localhost:8991/test')
+        var link = { rel: 'self', href: '/products/1' };
+        var result = siren({ links: link });
+        assert.strictEqual(result.links[0].href, 'http://localhost:8991/test/products/1');
       });
     });
 
